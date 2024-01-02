@@ -32,6 +32,12 @@ To populate local Postgres database:
 PYTHONPATH=. DB_HOST=localhost DB_PASS=postgres poetry run python bin/import-omdb-movies
 ```
 
+To populate Cloud SQL database:
+
+```sh
+PYTHONPATH=. INSTANCE_CONNECTION_NAME=moviesapi-409007:europe-west1:movies-api DB_PASS=postgres poetry run python bin/import-omdb-movies
+```
+
 ## Deployment
 
 The API is deployed as a Docker image on GCP with Cloud Run at [movies-api-6yotxag7iq-ew.a.run.app](https://movies-api-6yotxag7iq-ew.a.run.app/docs). There is a [deploy script](bin/deploy) that builds and pushes a new
