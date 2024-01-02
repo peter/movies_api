@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+
+# Script to test connecting to GCP Cloud SQL Postgres instance from Python
+# using TortoiseORM
+#
+# USAGE:
+#
+# Set up credentials file for Application Default Credentials (ADC):
+# gcloud auth application-default login
+#
+# Add dependencies:
+# poetry add tortoise-orm
+# poetry add asyncpg
+# poetry add aerich
+#
+# Run the script:
+# DB_PASS=... PYTHONPATH=. INSTANCE_CONNECTION_NAME=moviesapi-409007:europe-west1:movies-api DB_USER=postgres DB_NAME=movies_api poetry run python bin/db-test-tortoiseorm
+
+import os
+import asyncio
+from tortoise import Tortoise
+
+INSTANCE_CONNECTION_NAME = os.environ["INSTANCE_CONNECTION_NAME"]
+
+async def init():
+    # Here we create a SQLite DB using file "db.sqlite3"
+    #  also specify the app name of "models"
+    #  which contain models from "app.models"
+    await Tortoise.init(
+        config={
+            'apps': {
+                    'movies_api': {
+                        'models': ['movies_api.models'],
+                        # If no default_connection specified, defaults to 'default'
+                        'default_connection': 'default',
+                    }
+            },
+            'connections': {
+                'default': {
+                    "engine": "tortoise.backends.asyncpg",
+                    "credentials": {
+                        "database": os.environ["DB_NAME"],
+                        "host": f"/cloudsql/{INSTANCE_CONNECTION_NAME}/.s.PGSQL.5432",
+                        "password": os.environ["DB_PASS"],
+                        "user": os.environ["DB_USER"],
+                        "port": -1
+                    }
+                },
+                'apps': {
+                    'models': {
+                        'models': ['__main__'],
+                        'default_connection': 'default',
+                    }
+                }
+            }
+        }
+    )
+    # Generate the schema
+    await Tortoise.generate_schemas()
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(init())

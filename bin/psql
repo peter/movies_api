@@ -1,9 +1,15 @@
 #!/bin/bash
 
+set -x
+
 # Open psql session against GCP Cloud SQL Postgres database
 
+PROJECT_ID=moviesapi-409007
+REGION=europe-west1
 CLOUD_RUN_SERVICE_NAME=movies-api
+INSTANCE_ID=movies-api
 DATABASE_USER=postgres
 DATABASE=movies_api
+INSTANCE_IP=34.140.209.40
 
 gcloud sql connect $CLOUD_RUN_SERVICE_NAME --user=$DATABASE_USER --database=$DATABASE
