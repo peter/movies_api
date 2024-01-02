@@ -1,7 +1,6 @@
 # Movies API
 
-A simple REST API example implemented with FastAPI and Postgres using [OMDB API data](https://www.omdbapi.com/)
-that is deployed to GCP.
+A simple REST API example implemented with FastAPI and Postgres using [OMDB API data](https://www.omdbapi.com/) that is deployed to GCP.
 
 ## Developer Setup
 
@@ -20,8 +19,8 @@ poetry shell
 # Create database
 createdb -U postgres movies_api
 
-# Start server
-DB_HOST=localhost DB_PASS=postgres poetry run uvicorn movies_api.main:app --host 0.0.0.0 --port 8080
+# Start development server (starts uvicorn on port 8080)
+bin/start-dev
 ```
 
 ## Running Script to Import OMDB Movies
@@ -35,7 +34,7 @@ PYTHONPATH=. DB_HOST=localhost DB_PASS=postgres poetry run python bin/import-omd
 To populate Cloud SQL database:
 
 ```sh
-PYTHONPATH=. INSTANCE_CONNECTION_NAME=moviesapi-409007:europe-west1:movies-api DB_PASS=postgres poetry run python bin/import-omdb-movies
+PYTHONPATH=. INSTANCE_CONNECTION_NAME=moviesapi-409007:europe-west1:movies-api DB_PASS=... poetry run python bin/import-omdb-movies
 ```
 
 ## Deployment
@@ -81,4 +80,6 @@ done
 Libraries and frameworks:
 
 * [FastAPI - Python web framework](https://fastapi.tiangolo.com/)
+* [FastAPI and SQL Databases](https://fastapi.tiangolo.com/tutorial/sql-databases/)
+* [SQLModel package - combines Pydandic with SQLAlchemy](https://github.com/tiangolo/sqlmodel)
 * [Poetry - Python package management](https://python-poetry.org/)

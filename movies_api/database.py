@@ -2,7 +2,7 @@ import os
 
 from google.cloud.sql.connector import Connector, IPTypes
 import pg8000
-
+from sqlalchemy.orm import sessionmaker
 import sqlalchemy
 
 def db_engine() -> sqlalchemy.engine.base.Engine:
@@ -48,3 +48,18 @@ def db_engine() -> sqlalchemy.engine.base.Engine:
             creator=getconn,
             # ...
         )
+
+engine = db_engine()
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def db_connect():
+    conn = engine.connect()
+    return conn
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

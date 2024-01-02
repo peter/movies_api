@@ -1,12 +1,11 @@
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-from movies_api.database import db_engine
+from movies_api.database import db_connect
+from movies_api.routes import api_docs, health, movies
 
 app = FastAPI(title="Movies API")
 
-engine = db_engine()
-conn = engine.connect()
+db_connect()
 
-@app.get("/health", response_class=JSONResponse)
-def health():
-    return { 'status': 'ok' }
+app.include_router(api_docs.router)
+app.include_router(health.router)
+app.include_router(movies.router)

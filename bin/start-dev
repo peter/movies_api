@@ -1,0 +1,7 @@
+#!/bin/bash
+#
+# Start development server
+
+DB_PASS=${DB_PASS:-postgres}
+
+DB_HOST=localhost DB_PASS=$DB_PASS poetry run uvicorn movies_api.main:app --host 0.0.0.0 --port 8080 --reload
