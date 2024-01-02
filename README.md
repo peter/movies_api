@@ -4,11 +4,17 @@ A simple REST API example implemented with FastAPI and Postgres using [OMDB API 
 
 ## Developer Setup
 
+Dependencies:
+
+* Python 3.11
+* Poetry for Python package management
+* Postgres
+
 ```sh
 poetry install
 
 poetry shell
-# deactivate
+# To exit shell use: deactivate
 
 # Start server
 uvicorn movies_api.main:app --host 0.0.0.0 --port 8080
@@ -21,7 +27,7 @@ uvicorn movies_api.main:app --host 0.0.0.0 --port 8080
 open http://localhost:8080/docs
 ```
 
-## Invoke API with Curl
+## Invoking the API with Curl
 
 ```sh
 # Health endpoint returns status 200 and JSON
