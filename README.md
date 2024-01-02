@@ -17,8 +17,19 @@ poetry install
 poetry shell
 # To exit shell use: deactivate
 
+# Create database
+createdb -U postgres movies_api
+
 # Start server
-uvicorn movies_api.main:app --host 0.0.0.0 --port 8080
+DB_HOST=localhost DB_PASS=postgres poetry run uvicorn movies_api.main:app --host 0.0.0.0 --port 8080
+```
+
+## Running Script to Import OMDB Movies
+
+To populate local Postgres database:
+
+```sh
+PYTHONPATH=. DB_HOST=localhost DB_PASS=postgres poetry run python bin/import-omdb-movies
 ```
 
 ## Deployment
@@ -43,6 +54,20 @@ curl -s http://0.0.0.0:8080/health | jq
 
 # Unknown endpoint yields 404
 curl -i http://0.0.0.0:8080
+```
+
+## Downloading OMDB Data with curl
+
+```sh
+export OMDB_API_URL=http://www.omdbapi.com
+export OMDB_API_KEY=...
+
+IFS=$'\n'
+for movie_name in $(cat data/imdb-top-250-movie-titles.txt)
+do
+    echo $movie_name
+    curl -s -G "$OMDB_API_URL/?apikey=$OMDB_API_KEY" --data-urlencode "t=$movie_name" | jq
+done
 ```
 
 ## Resources

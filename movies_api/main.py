@@ -1,12 +1,11 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from movies_api.database import connect_with_connector
+from movies_api.database import db_engine
 
 app = FastAPI(title="Movies API")
 
-engine = connect_with_connector()
+engine = db_engine()
 conn = engine.connect()
-print(conn)
 
 @app.get("/health", response_class=JSONResponse)
 def health():

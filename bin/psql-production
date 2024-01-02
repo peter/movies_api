@@ -1,8 +1,8 @@
 #!/bin/bash
+#
+# Open psql session against GCP Cloud SQL Postgres database
 
 set -x
-
-# Open psql session against GCP Cloud SQL Postgres database
 
 PROJECT_ID=moviesapi-409007
 REGION=europe-west1
