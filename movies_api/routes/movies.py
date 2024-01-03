@@ -9,7 +9,21 @@ router = APIRouter()
 
 class MovieModel(BaseModel):
     id: int | None = None
+
     title: str
+
+    plot: str | None = None
+    language: str | None = None
+    country: str | None = None
+    director: str | None = None
+
+    year: int | None = None
+    runtime: int | None = None
+    imdb_rating: float | None = None
+
+    writer: str | None = None
+    genre: str | None = None
+    actors: str | None = None
 
 READ_ONLY_FIELDS = ['id']
 
@@ -63,7 +77,7 @@ def movies_omdb_add(body: OMDBQueryModel, db: Session = Depends(get_db)) -> Movi
     omdb_movie = omdb.get_movie_by_title(body.title)
     if not omdb_movie:
         return Response(status_code=status.HTTP_404_NOT_FOUND)
-    create_fields = writable_fields({'title': omdb_movie['Title']})
+    create_fields = writable_fields(omdb_movie)
     movie = create_movie(db, create_fields)
     return movie
 

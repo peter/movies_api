@@ -14,7 +14,7 @@ def read_movie_titles():
 
 def save_movie(movie, session):
     try:
-        db_movie = Movie(title = movie['Title'])
+        db_movie = Movie(**movie)
         session.add_all([db_movie])
         session.commit()
         return True
