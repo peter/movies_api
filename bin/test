@@ -1,0 +1,7 @@
+#!/bin/bash
+#
+# Run tests
+
+dropdb -U postgres movies_api_test --if-exists
+createdb -U postgres movies_api_test
+PYTHONPATH=. DB_PASS=postgres DB_HOST=localhost DB_NAME=movies_api_test poetry run pytest --import-mode importlib -s

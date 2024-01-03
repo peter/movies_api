@@ -1,7 +1,8 @@
 import json
 import traceback
 import movies_api.services.omdb as omdb
-from movies_api.database import db_engine
+from movies_api.database import engine, db_connect
+from movies_api.database_schema import init_db_schema
 from movies_api.models.movie import Movie
 from sqlalchemy.orm import Session
 
@@ -35,9 +36,8 @@ def import_movies(movie_titles, session):
     return movies
 
 def run_import():
-    engine = db_engine()
-    engine.connect()
-    Movie.metadata.create_all(engine)
+    db_connect()
+    init_db_schema()
     with Session(engine) as session:
         movie_titles = read_movie_titles()
         movies = import_movies(movie_titles, session)

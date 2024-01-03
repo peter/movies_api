@@ -25,6 +25,13 @@ bin/start-dev
 open http://localhost:8080
 ```
 
+## Testing
+
+```sh
+# Run the pytest tests (this will recreate the movies_api_test database first)
+bin/test
+```
+
 ## Invoking the API with Curl
 
 ```sh
@@ -147,4 +154,5 @@ Libraries and frameworks:
 * [FastAPI and SQL Databases](https://fastapi.tiangolo.com/tutorial/sql-databases/)
 * [FastAPI Testing](https://fastapi.tiangolo.com/tutorial/testing/)
 * [SQLModel package - combines Pydandic with SQLAlchemy](https://github.com/tiangolo/sqlmodel)
+* [Python ORM Alternatives](https://www.infoworld.com/article/3709854/6-orms-for-every-database-powered-python-app.html)
 * [Poetry - Python package management](https://python-poetry.org/)

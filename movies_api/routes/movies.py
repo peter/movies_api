@@ -4,6 +4,7 @@ from movies_api.database import get_db
 import movies_api.services.omdb as omdb
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from sqlalchemy import inspect
 
 router = APIRouter()
 
@@ -48,7 +49,7 @@ def create_movie(db, create_fields):
 # List movies endpoint
 class ListResponseBody(BaseModel):
     data: list[MovieModel]
-@router.get("/movies")
+@router.get("/movies", response_model_exclude_none=True)
 def movies_list(
     limit: int | None = 10,
     offset: int | None = 0,
@@ -58,11 +59,11 @@ def movies_list(
     query = db.query(Movie)
     if title:
         query = query.filter_by(title=title)
-    data = query.order_by(Movie.title).offset(offset).limit(limit).all()
-    return { 'data': data }
+    movies = query.order_by(Movie.title).offset(offset).limit(limit).all()
+    return {'data': movies}
 
 # Get movie endpoint
-@router.get("/movies/{id}")
+@router.get("/movies/{id}", response_model_exclude_none=True)
 def movies_get(id: int, db: Session = Depends(get_db)) -> MovieModel:
     movie = db.query(Movie).filter(Movie.id == id).first()
     if not movie:
@@ -72,7 +73,7 @@ def movies_get(id: int, db: Session = Depends(get_db)) -> MovieModel:
 # Add movie from OMDB endpoint
 class OMDBQueryModel(BaseModel):
     title: str
-@router.post("/movies/omdb-add")
+@router.post("/movies/omdb-add", response_model_exclude_none=True)
 def movies_omdb_add(body: OMDBQueryModel, db: Session = Depends(get_db)) -> MovieModel:
     omdb_movie = omdb.get_movie_by_title(body.title)
     if not omdb_movie:
@@ -82,14 +83,14 @@ def movies_omdb_add(body: OMDBQueryModel, db: Session = Depends(get_db)) -> Movi
     return movie
 
 # Create movie endpoint
-@router.post("/movies")
+@router.post("/movies", response_model_exclude_none=True)
 def movies_create(body: MovieModel, db: Session = Depends(get_db)) -> MovieModel:
     create_fields = writable_fields(body.model_dump())
     movie = create_movie(db, create_fields)
     return movie
 
 # Update movie endpoint
-@router.put("/movies/{id}")
+@router.put("/movies/{id}", response_model_exclude_none=True)
 def movies_update(id: int, body: MovieModel, db: Session = Depends(get_db)) -> MovieModel:
     movie = db.query(Movie).filter(Movie.id==id).first()
     if not movie:
