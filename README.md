@@ -30,6 +30,9 @@ open http://localhost:8080
 ```sh
 # Run the pytest tests (this will recreate the movies_api_test database first)
 bin/test
+
+# In order to test the endpoint that adds movie from OMDB you need the OMDB API key:
+OMDB_API_KEY=... bin/test
 ```
 
 ## Invoking the API with Curl
