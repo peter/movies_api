@@ -21,6 +21,8 @@ createdb -U postgres movies_api
 
 # Start development server (starts uvicorn on port 8080)
 bin/start-dev
+
+open http://localhost:8080
 ```
 
 ## Running Script to Import OMDB Movies
@@ -28,13 +30,13 @@ bin/start-dev
 To populate local Postgres database:
 
 ```sh
-PYTHONPATH=. DB_HOST=localhost DB_PASS=postgres poetry run python bin/import-omdb-movies
+DB_HOST=localhost DB_PASS=postgres poetry run python bin/omdb-import
 ```
 
 To populate Cloud SQL database:
 
 ```sh
-PYTHONPATH=. INSTANCE_CONNECTION_NAME=moviesapi-409007:europe-west1:movies-api DB_PASS=... poetry run python bin/import-omdb-movies
+INSTANCE_CONNECTION_NAME=moviesapi-409007:europe-west1:movies-api DB_PASS=... poetry run python bin/omdb-import
 ```
 
 ## Deployment
@@ -79,7 +81,7 @@ done
 
 Libraries and frameworks:
 
-* [FastAPI - Python web framework](https://fastapi.tiangolo.com/)
 * [FastAPI and SQL Databases](https://fastapi.tiangolo.com/tutorial/sql-databases/)
+* [FastAPI Testing](https://fastapi.tiangolo.com/tutorial/testing/)
 * [SQLModel package - combines Pydandic with SQLAlchemy](https://github.com/tiangolo/sqlmodel)
 * [Poetry - Python package management](https://python-poetry.org/)

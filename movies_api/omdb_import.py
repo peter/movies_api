@@ -1,15 +1,9 @@
-#!/usr/bin/env python
-
-import os
-import requests
-import traceback
 import json
+import traceback
+import movies_api.services.omdb as omdb
 from movies_api.database import db_engine
 from movies_api.models.movie import Movie
 from sqlalchemy.orm import Session
-
-OMDB_API_URL = 'http://www.omdbapi.com'
-OMDB_API_KEY = os.environ['OMDB_API_KEY']
 
 MOVIE_TITLES_FILE_PATH = 'data/imdb-top-250-movie-titles.txt'
 
@@ -17,18 +11,6 @@ def read_movie_titles():
     with open(MOVIE_TITLES_FILE_PATH) as file:
         lines = [line.rstrip() for line in file]
         return lines
-
-def get_movie_by_title(title):
-    try:
-        params = {
-            'apiKey': OMDB_API_KEY,
-            't': title
-        }
-        response = requests.get(OMDB_API_URL, params=params)
-        return response.json() if response.status_code == 200 else None
-    except Exception as error:
-        print(f'Error thrown invoking OMDB API', params, error, traceback.format_exc())
-        return None
 
 def save_movie(movie, session):
     try:
@@ -44,7 +26,7 @@ def import_movies(movie_titles, session):
     movies = []
     for index, movie_title in enumerate(movie_titles):
         print(f'Downloading movie {index + 1}/{len(movie_titles)}: {movie_title}')
-        movie = get_movie_by_title(movie_title)
+        movie = omdb.get_movie_by_title(movie_title)
         if movie:
             if save_movie(movie, session):
                 movies.append(movie)
@@ -52,12 +34,12 @@ def import_movies(movie_titles, session):
             print(f'Could not find movie {movie_title}')
     return movies
 
-engine = db_engine()
-conn = engine.connect()
-Movie.metadata.create_all(engine)
-
-with Session(engine) as session:
-    movie_titles = read_movie_titles()
-    movies = import_movies(movie_titles, session)
-    print(f'Number of movies imported: {len(movies)} / {len(movie_titles)}')
-    print(json.dumps(movies, indent=2))
+def run_import():
+    engine = db_engine()
+    engine.connect()
+    Movie.metadata.create_all(engine)
+    with Session(engine) as session:
+        movie_titles = read_movie_titles()
+        movies = import_movies(movie_titles, session)
+        print(f'Number of movies imported: {len(movies)} / {len(movie_titles)}')
+        print(json.dumps(movies, indent=2))
