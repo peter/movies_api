@@ -57,6 +57,18 @@ curl -i $BASE_URL/movies/123456
 curl -i $BASE_URL/movies/asdf
 
 #######################################
+# add movie from OMDB endpoint
+#######################################
+
+# Successful add - returns created movie with ID
+curl -H "Content-Type: application/json" -X POST -d '{"title":"The Hours"}' $BASE_URL/movies/omdb-add | jq
+# Invalid add yields 422 Unprocessable Entity with a validation error message from Pydantic
+curl -i -H "Content-Type: application/json" -X POST -d '{"titless":"The Hours"}' $BASE_URL/movies/omdb-add
+# If the movie title doesn't exist in OMDB we get a 404
+curl -i -H "Content-Type: application/json" -X POST -d '{"title":"foooooobar"}' $BASE_URL/movies/omdb-add
+
+
+#######################################
 # create endpoint
 #######################################
 
