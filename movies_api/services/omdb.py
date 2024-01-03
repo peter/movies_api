@@ -12,7 +12,14 @@ def get_movie_by_title(title):
             't': title
         }
         response = requests.get(OMDB_API_URL, params=params)
-        return response.json() if response.status_code == 200 else None
+        if response.status_code == 200:
+            data = response.json()
+            if 'Error' in data:
+                # NOTE: not found movies yield status 200 and {"Response":"False","Error":"Movie not found!"}
+                return None
+            return data
+        else:
+            return None
     except Exception as error:
         print(f'Error thrown invoking OMDB API', params, error, traceback.format_exc())
         return None

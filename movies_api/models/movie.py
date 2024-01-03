@@ -7,7 +7,7 @@ class Movie(Base):
     __tablename__ = "movies"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(100), unique=True)
+    title: Mapped[str] = mapped_column(String(100), index=True)
 
     def __repr__(self) -> str:
         return f"Movie(id={self.id!r}, name={self.name!r}"
