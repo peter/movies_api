@@ -49,6 +49,9 @@ def create_movie(db, create_fields):
 # List movies endpoint
 class ListResponseBody(BaseModel):
     data: list[MovieModel]
+    count: int
+    limit: int
+    offset: int
 @router.get("/movies", response_model_exclude_none=True)
 def movies_list(
     limit: int | None = 10,
@@ -56,11 +59,17 @@ def movies_list(
     title: str | None = None,
     db: Session = Depends(get_db)
 ) -> ListResponseBody:
+    count = db.query(Movie).count()
     query = db.query(Movie)
     if title:
         query = query.filter_by(title=title)
     movies = query.order_by(Movie.title).offset(offset).limit(limit).all()
-    return {'data': movies}
+    return {
+        'data': movies,
+        'count': count,
+        'limit': limit,
+        'offset': offset
+    }
 
 # Get movie endpoint
 @router.get("/movies/{id}", response_model_exclude_none=True)

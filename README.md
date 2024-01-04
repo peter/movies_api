@@ -27,6 +27,8 @@ open http://localhost:8080
 
 ## Testing
 
+Pytest is used for testing and the tests are in [test_movies.py](movies_api/routes/test_movies.py)
+
 ```sh
 # Run the pytest tests (this will recreate the movies_api_test database first)
 bin/test
@@ -76,7 +78,6 @@ curl -H "Content-Type: application/json" -X POST -d '{"title":"The Hours"}' $BAS
 curl -i -H "Content-Type: application/json" -X POST -d '{"titless":"The Hours"}' $BASE_URL/movies/omdb-add
 # If the movie title doesn't exist in OMDB we get a 404
 curl -i -H "Content-Type: application/json" -X POST -d '{"title":"foooooobar"}' $BASE_URL/movies/omdb-add
-
 
 #######################################
 # create endpoint
