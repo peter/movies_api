@@ -2,7 +2,7 @@
 
 A simple REST API example implemented with FastAPI and Postgres using [OMDB API data](https://www.omdbapi.com/) that is deployed to GCP.
 
-## Dev Setup
+## Developer Setup
 
 Dependencies:
 
@@ -135,20 +135,6 @@ open http://localhost:8080/docs
 
 # The OpenAPI/Swagger spec:
 open http://localhost:8080/openapi.json
-```
-
-## Downloading OMDB Data with curl
-
-```sh
-export OMDB_API_URL=http://www.omdbapi.com
-export OMDB_API_KEY=...
-
-IFS=$'\n'
-for movie_name in $(cat data/imdb-top-250-movie-titles.txt)
-do
-    echo $movie_name
-    curl -s -G "$OMDB_API_URL/?apikey=$OMDB_API_KEY" --data-urlencode "t=$movie_name" | jq
-done
 ```
 
 ## Resources
