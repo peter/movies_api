@@ -6,6 +6,11 @@ from movies_api.main import app
 
 client = TestClient(app)
 
+def movies_count():
+    response = client.get("/movies")
+    assert response.status_code == 200
+    return response.json()['count']
+
 def test_movies_list():
     movies = [
         {'title': 'The Shining'},
@@ -23,7 +28,10 @@ def test_movies_list():
             {'id': 3, 'title': 'Juno'},
             {'id': 2, 'title': 'The Hours'},
             {'id': 1, 'title': 'The Shining'},
-        ]
+        ],
+        'count': 3,
+        'limit': 10,
+        'offset': 0
     }    
 
     response = client.get("/movies?limit=1")
@@ -31,7 +39,10 @@ def test_movies_list():
     assert response.json() == {
         'data': [
             {'id': 3, 'title': 'Juno'},
-        ]
+        ],
+        'count': 3,
+        'limit': 1,
+        'offset': 0
     }    
 
     response = client.get("/movies?limit=1&offset=1")
@@ -39,7 +50,10 @@ def test_movies_list():
     assert response.json() == {
         'data': [
             {'id': 2, 'title': 'The Hours'},
-        ]
+        ],
+        'count': 3,
+        'limit': 1,
+        'offset': 1
     }    
 
 def test_movies_get():
@@ -102,9 +116,11 @@ def test_movies_create():
         'genre': 'Biography, Drama, History',
         'actors': 'Cillian Murphy, Emily Blunt, Matt Damon',
     }
+    count_before = movies_count()
     response = client.post('/movies', json=movie)
     assert response.status_code == 200    
     created_movie = response.json()
+    assert movies_count() == count_before + 1
 
     response = client.get(f'/movies/{created_movie["id"]}')
     assert response.status_code == 200    
@@ -122,6 +138,8 @@ def test_movies_create():
     invalid_movie = { **movie, 'title': None}
     response = client.post("/movies", json=invalid_movie)
     assert response.status_code == 422
+
+    assert movies_count() == count_before + 1
 
 def test_movies_update():
     movie = {'title': 'Barbie'}
@@ -159,8 +177,10 @@ def test_movies_delete():
     assert response.status_code == 200    
     created_movie = response.json()
 
+    count_before = movies_count()
     response = client.delete(f'/movies/{created_movie["id"]}')
     assert response.status_code == 204
+    assert movies_count() == count_before - 1
 
     response = client.get(f'/movies/{created_movie["id"]}')
     assert response.status_code == 404
