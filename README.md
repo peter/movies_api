@@ -104,9 +104,9 @@ curl -i -H "Content-Type: application/json" -X PUT -d '{"title":"Awesome Movie"}
 #######################################
 
 # Successful delete yields 204 No Content
-curl -i -X DELETE $BASE_URL/movies/1
+curl -i -X DELETE -u 'joe:secret' $BASE_URL/movies/1
 # A non-existant ID yields a 404
-curl -i -X DELETE $BASE_URL/movies/12345
+curl -i -X DELETE -u 'joe:secret' $BASE_URL/movies/12345
 ```
 
 ## Running Script to Import OMDB Movies
@@ -136,6 +136,13 @@ open http://localhost:8080/docs
 # The OpenAPI/Swagger spec:
 open http://localhost:8080/openapi.json
 ```
+
+## Dislaimer/Scope/Discussion
+
+* The [SQLModel library](https://github.com/tiangolo/sqlmodel) (a compatible wrapper on top of SQLLachemy and Pydantic) could offer a way to avoid duplicating the model schema
+* Database data should be cleared out between each test to avoid risk of test interference
+* The delete endpoint would be more efficient if it didn't fetch the record before deleting it
+* Linting, more type hints, and potentially code formating should be added
 
 ## Resources
 

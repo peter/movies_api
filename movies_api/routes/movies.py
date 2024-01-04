@@ -1,12 +1,17 @@
+import os
 from fastapi import APIRouter, Response, status, Depends
-from movies_api.models.movie import Movie
-from movies_api.database import get_db
-import movies_api.services.omdb as omdb
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from typing import Annotated
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from datetime import datetime
+from movies_api.models.movie import Movie
+from movies_api.database import get_db
+import movies_api.services.omdb as omdb
 
 router = APIRouter()
+
+security = HTTPBasic()
 
 class MovieModel(BaseModel):
     id: int | None = None
@@ -31,9 +36,15 @@ class MovieModel(BaseModel):
 
 READ_ONLY_FIELDS = ['id', 'created_at', 'updated_at']
 
+ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
+
 #######################################
 # Helper Methods
 #######################################
+
+def is_admin(username, password):
+    return username == ADMIN_USERNAME and password == ADMIN_PASSWORD
 
 def writable_fields(fields):
     return {k: fields[k] for k in fields.keys() if k not in READ_ONLY_FIELDS}
@@ -117,7 +128,9 @@ def movies_update(id: int, body: MovieModel, db: Session = Depends(get_db)) -> M
 
 # Delete movie endpoint
 @router.delete("/movies/{id}")
-def movies_delete(id: int, db: Session = Depends(get_db)):
+def movies_delete(id: int, credentials: Annotated[HTTPBasicCredentials, Depends(security)], db: Session = Depends(get_db)):
+    if not is_admin(credentials.username, credentials.password):
+        return Response(status_code=status.HTTP_401_UNAUTHORIZED)
     # TODO: delete without fetching the movie would be more efficient
     movie = db.query(Movie).filter(Movie.id==id).first()
     if not movie:

@@ -2,6 +2,7 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 import re
+from base64 import b64encode
 
 from movies_api.main import app
 
@@ -10,6 +11,9 @@ client = TestClient(app)
 # Example value: "2024-01-04T10:23:33.658319+01:00"
 DATETIME_PATTERN = r'^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d+\+\d\d:\d\d$'
 
+ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
+
 def movies_count():
     response = client.get("/movies")
     assert response.status_code == 200
@@ -17,6 +21,10 @@ def movies_count():
 
 def omit_time_meta(movie):
     return {k: v for k, v in movie.items() if k not in ['created_at', 'updated_at']}
+
+def basic_auth_header(username, password):
+    token = b64encode(f"{username}:{password}".encode('utf-8')).decode("ascii")
+    return f'Basic {token}'
 
 def test_movies_list():
     movies_data = [
@@ -188,13 +196,22 @@ def test_movies_delete():
     assert response.status_code == 200    
     created_movie = response.json()
 
-    count_before = movies_count()
+    # Unauthorized - missing credentials
     response = client.delete(f'/movies/{created_movie["id"]}')
+    assert response.status_code == 401
+
+    # Unauthorized - invalid credentials
+    headers = {'Authorization': basic_auth_header(ADMIN_USERNAME, 'invalid password')}
+    response = client.delete(f'/movies/{created_movie["id"]}', headers=headers)
+    assert response.status_code == 401
+
+    # Success
+    count_before = movies_count()
+    headers = {'Authorization': basic_auth_header(ADMIN_USERNAME, ADMIN_PASSWORD)}
+    response = client.delete(f'/movies/{created_movie["id"]}', headers=headers)
     assert response.status_code == 204
     assert movies_count() == count_before - 1
 
+    # Missing
     response = client.get(f'/movies/{created_movie["id"]}')
-    assert response.status_code == 404
-
-    response = client.delete(f'/movies/{created_movie["id"]}')
     assert response.status_code == 404
