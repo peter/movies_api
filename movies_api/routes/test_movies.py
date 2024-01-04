@@ -84,3 +84,86 @@ def test_movies_omdb_add():
     response = client.get(f'/movies/{created_movie["id"]}')
     assert response.status_code == 200
     assert response.json() == created_movie
+
+def test_movies_create():
+    movie = {
+        'title': 'Oppenheimer',
+
+        'plot': 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.',
+        'language': 'English, German, Italian',
+        'country': 'United States, United Kingdom',
+        'director': 'Christopher Nolan',
+
+        'year': 2023,
+        'runtime': 180,
+        'imdb_rating': 8.4,
+
+        'writer': 'Christopher Nolan, Kai Bird, Martin Sherwin',
+        'genre': 'Biography, Drama, History',
+        'actors': 'Cillian Murphy, Emily Blunt, Matt Damon',
+    }
+    response = client.post('/movies', json=movie)
+    assert response.status_code == 200    
+    created_movie = response.json()
+
+    response = client.get(f'/movies/{created_movie["id"]}')
+    assert response.status_code == 200    
+    assert response.json() == {
+        'id': created_movie['id'],
+        **movie
+    }
+
+    # Invalid field type
+    invalid_movie = { **movie, 'year': 'foobar'}
+    response = client.post("/movies", json=invalid_movie)
+    assert response.status_code == 422
+
+    # Title is required
+    invalid_movie = { **movie, 'title': None}
+    response = client.post("/movies", json=invalid_movie)
+    assert response.status_code == 422
+
+def test_movies_update():
+    movie = {'title': 'Barbie'}
+    response = client.post("/movies", json=movie)
+    assert response.status_code == 200    
+    created_movie = response.json()
+
+    # Successful update
+    updated_movie={**created_movie, 'title': 'foobar', 'year': 2023}
+    response = client.put(f'/movies/{created_movie["id"]}', json=updated_movie)
+    assert response.status_code == 200
+    assert response.json()['title'] == updated_movie['title']
+
+    response = client.get(f'/movies/{created_movie["id"]}')
+    assert response.status_code == 200    
+    assert response.json() == updated_movie
+
+    # Invalid field type
+    invalid_movie={**created_movie, 'title': 123}
+    response = client.put(f'/movies/{created_movie["id"]}', json=invalid_movie)
+    assert response.status_code == 422
+
+    # Movie is unchanged
+    response = client.get(f'/movies/{created_movie["id"]}')
+    assert response.status_code == 200    
+    assert response.json() == updated_movie
+
+    # Missing ID
+    response = client.put(f'/movies/1234567', json=updated_movie)
+    assert response.status_code == 404
+
+def test_movies_delete():
+    movie = {'title': 'Barbie'}
+    response = client.post("/movies", json=movie)
+    assert response.status_code == 200    
+    created_movie = response.json()
+
+    response = client.delete(f'/movies/{created_movie["id"]}')
+    assert response.status_code == 204
+
+    response = client.get(f'/movies/{created_movie["id"]}')
+    assert response.status_code == 404
+
+    response = client.delete(f'/movies/{created_movie["id"]}')
+    assert response.status_code == 404
