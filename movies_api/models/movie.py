@@ -1,8 +1,10 @@
-from sqlalchemy import String
+from sqlalchemy import String, DateTime
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
+from sqlalchemy.sql import func
 from typing import Optional
 from movies_api.models.base import Base
+from datetime import datetime
 
 class Movie(Base):
     __tablename__ = "movies"
@@ -23,6 +25,9 @@ class Movie(Base):
     writer: Mapped[Optional[str]]
     genre: Mapped[Optional[str]]
     actors: Mapped[Optional[str]]
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
 
     def __repr__(self) -> str:
         return f"Movie(id={self.id!r}, title={self.title!r}"

@@ -4,7 +4,7 @@ from movies_api.database import get_db
 import movies_api.services.omdb as omdb
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from sqlalchemy import inspect
+from datetime import datetime
 
 router = APIRouter()
 
@@ -26,7 +26,10 @@ class MovieModel(BaseModel):
     genre: str | None = None
     actors: str | None = None
 
-READ_ONLY_FIELDS = ['id']
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+READ_ONLY_FIELDS = ['id', 'created_at', 'updated_at']
 
 #######################################
 # Helper Methods
@@ -105,6 +108,7 @@ def movies_update(id: int, body: MovieModel, db: Session = Depends(get_db)) -> M
     if not movie:
         return Response(status_code=status.HTTP_404_NOT_FOUND)
     update_fields = writable_fields(body.model_dump())
+    update_fields['updated_at'] = datetime.now()
     for field, value in update_fields.items():
         setattr(movie, field, value)
     db.commit()

@@ -1,33 +1,42 @@
 import os
 import pytest
 from fastapi.testclient import TestClient
+import re
 
 from movies_api.main import app
 
 client = TestClient(app)
+
+# Example value: "2024-01-04T10:23:33.658319+01:00"
+DATETIME_PATTERN = r'^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d+\+\d\d:\d\d$'
 
 def movies_count():
     response = client.get("/movies")
     assert response.status_code == 200
     return response.json()['count']
 
+def omit_time_meta(movie):
+    return {k: v for k, v in movie.items() if k not in ['created_at', 'updated_at']}
+
 def test_movies_list():
-    movies = [
+    movies_data = [
         {'title': 'The Shining'},
         {'title': 'The Hours'},
         {'title': 'Juno'},
     ]
-    for movie in movies:
-        response = client.post("/movies", json=movie)
-        assert response.status_code == 200    
+    movies = []
+    for movie_data in movies_data:
+        response = client.post("/movies", json=movie_data)
+        assert response.status_code == 200
+        movies.append(response.json())
 
     response = client.get("/movies")
     assert response.status_code == 200
     assert response.json() == {
         'data': [
-            {'id': 3, 'title': 'Juno'},
-            {'id': 2, 'title': 'The Hours'},
-            {'id': 1, 'title': 'The Shining'},
+            movies[2],
+            movies[1],
+            movies[0],
         ],
         'count': 3,
         'limit': 10,
@@ -38,7 +47,7 @@ def test_movies_list():
     assert response.status_code == 200
     assert response.json() == {
         'data': [
-            {'id': 3, 'title': 'Juno'},
+            movies[2],
         ],
         'count': 3,
         'limit': 1,
@@ -49,7 +58,7 @@ def test_movies_list():
     assert response.status_code == 200
     assert response.json() == {
         'data': [
-            {'id': 2, 'title': 'The Hours'},
+            movies[1],
         ],
         'count': 3,
         'limit': 1,
@@ -61,13 +70,11 @@ def test_movies_get():
     response = client.post("/movies", json=movie)
     assert response.status_code == 200    
     created_movie = response.json()
+    assert created_movie['title'] == movie['title']
 
     response = client.get(f'/movies/{created_movie["id"]}')
     assert response.status_code == 200    
-    assert response.json() == {
-        'id': created_movie['id'],
-        **movie
-    }
+    assert response.json() == created_movie
 
     response = client.get(f'/movies/1234567')
     assert response.status_code == 404
@@ -119,15 +126,17 @@ def test_movies_create():
     count_before = movies_count()
     response = client.post('/movies', json=movie)
     assert response.status_code == 200    
-    created_movie = response.json()
+    created_movie = response.json()    
     assert movies_count() == count_before + 1
 
     response = client.get(f'/movies/{created_movie["id"]}')
     assert response.status_code == 200    
-    assert response.json() == {
+    assert omit_time_meta(response.json()) == {
         'id': created_movie['id'],
         **movie
     }
+    assert re.match(DATETIME_PATTERN, response.json()['created_at'])
+    assert re.match(DATETIME_PATTERN, response.json()['updated_at'])
 
     # Invalid field type
     invalid_movie = { **movie, 'year': 'foobar'}
@@ -155,7 +164,9 @@ def test_movies_update():
 
     response = client.get(f'/movies/{created_movie["id"]}')
     assert response.status_code == 200    
-    assert response.json() == updated_movie
+    assert omit_time_meta(response.json()) == omit_time_meta(updated_movie)
+    assert re.match(DATETIME_PATTERN, response.json()['updated_at'])
+    assert response.json()['updated_at'] != created_movie['updated_at']
 
     # Invalid field type
     invalid_movie={**created_movie, 'title': 123}
@@ -165,7 +176,7 @@ def test_movies_update():
     # Movie is unchanged
     response = client.get(f'/movies/{created_movie["id"]}')
     assert response.status_code == 200    
-    assert response.json() == updated_movie
+    assert omit_time_meta(response.json()) == omit_time_meta(updated_movie)
 
     # Missing ID
     response = client.put(f'/movies/1234567', json=updated_movie)

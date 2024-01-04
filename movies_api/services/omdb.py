@@ -40,6 +40,8 @@ def to_movie_fields(omdb_fields):
     return result
 
 def get_movie_by_title(title):
+    if not OMDB_API_KEY:
+        raise Exception('You need to set env var OMDB_API_KEY to invoke the OMDB API')
     try:
         params = {
             'apiKey': OMDB_API_KEY,

@@ -114,13 +114,13 @@ curl -i -X DELETE $BASE_URL/movies/12345
 To populate local Postgres database:
 
 ```sh
-DB_HOST=localhost DB_PASS=postgres poetry run python bin/omdb-import
+OMDB_API_KEY=... DB_HOST=localhost DB_PASS=postgres poetry run python bin/omdb-import
 ```
 
 To populate Cloud SQL database:
 
 ```sh
-INSTANCE_CONNECTION_NAME=moviesapi-409007:europe-west1:movies-api DB_PASS=... poetry run python bin/omdb-import
+OMDB_API_KEY=... INSTANCE_CONNECTION_NAME=moviesapi-409007:europe-west1:movies-api DB_PASS=... poetry run python bin/omdb-import
 ```
 
 ## Deployment
